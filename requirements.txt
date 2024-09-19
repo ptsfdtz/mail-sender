@@ -1,0 +1,2 @@
+smtplib==1.0.1
+openpyxl==2.4.8
