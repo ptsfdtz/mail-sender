@@ -6,7 +6,7 @@ from utils.smtp_utils import get_smtp_settings
 
 class EmailSenderApp:
     def __init__(self):
-        self.file_path = './data/录取名单.xlsx'
+        self.file_path = './data/未录取名单.xlsx'
         self.username, self.password = read_credentials('./key.txt')
 
         recipient_data = read_recipient_list(self.file_path)
@@ -37,7 +37,7 @@ class EmailSenderApp:
         msg['To'] = recipient_email
 
         try:
-            with open('web/录取通知.html', 'r', encoding='utf-8') as f:
+            with open('web/未录取通知.html', 'r', encoding='utf-8') as f:
                 html_content = f.read()
 
             html_content = html_content.replace('{{name}}', recipient_name)
@@ -55,4 +55,9 @@ def main():
     EmailSenderApp()
 
 if __name__ == '__main__':
-    main()
+    print("----------------")
+    print("南京工业大学校大学生科学技术协会面试结果通知")
+    print("确认发送的内容无误，文件路径正确，请输入 y 开始发送。")
+    question = input("是否开始发送邮件？(y/n)")
+    if question.lower() == 'y':
+        main()
