@@ -7,5 +7,9 @@ def get_smtp_settings(email_address):
         return 'smtp.gmail.com', 465
     elif domain == 'qq.com':
         return 'smtp.qq.com', 465
+    elif domain == 'outlook.com':
+        return'smtp-mail.outlook.com', 587
+    elif domain == 'foxmail.com':
+        return'smtp.foxmail.com', 465
     else:
         raise ValueError(f"不支持的电子邮件域名: {domain}")
