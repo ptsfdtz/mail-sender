@@ -1,14 +1,17 @@
 import smtplib
+import json
 from email.message import EmailMessage
 from tqdm import tqdm
 from utils.file_utils import read_recipient_list, read_credentials
 from utils.smtp_utils import get_smtp_settings
 
 class EmailSenderApp:
-    def __init__(self):
-        self.file_path = f'./data/{input("录取 or 未录取")}名单.xlsx'
+    def __init__(self, config):
+        self.status = config["status"]
+        self.department = config["department"]
+        self.qq_group_id = config["qqGroupId"]
+        self.file_path = f'./data/{self.status}名单.xlsx'
         self.username, self.password = read_credentials('./key.txt')
-        print(f"名单 {self.file_path}")
         recipient_data = read_recipient_list(self.file_path)
 
         if recipient_data:
@@ -33,12 +36,13 @@ class EmailSenderApp:
         msg['To'] = recipient_email
 
         try:
-            __path__ = f'web/{input("录取 or 未录取")}通知.html'
+            __path__ = f'web/{self.status}通知.html'
             with open(__path__, 'r', encoding='utf-8') as f:
                 html_content = f.read()
 
             html_content = html_content.replace('{{name}}', recipient_name)
-            html_content = html_content.replace('{{qqGroupId}}', '788418335')
+            html_content = html_content.replace('{{qqGroupId}}', self.qq_group_id)
+            html_content = html_content.replace('{{department}}', self.department)
             msg.add_alternative(html_content, subtype='html')
             smtp.login(email_address, email_password)
             smtp.send_message(msg)
@@ -49,10 +53,15 @@ class EmailSenderApp:
             smtp.quit()
 
 def main():
-    EmailSenderApp()
+    with open('config.json', 'r', encoding='utf-8') as config_file:
+        config = json.load(config_file)
+
+    print(json.dumps(config, indent=4, ensure_ascii=False))
+
+    question = input("确认发送邮件吗？(y/n): ")
+    if question.lower() == 'y':
+        EmailSenderApp(config)
+        input("按任意键退出...")
 
 if __name__ == '__main__':
-    question = input("是否开始发送邮件？(y/n)")
-    if question.lower() == 'y':
-        main()
-        input("按任意键退出...")
+    main()
