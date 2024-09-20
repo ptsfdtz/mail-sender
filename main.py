@@ -55,3 +55,4 @@ if __name__ == '__main__':
     question = input("是否开始发送邮件？(y/n)")
     if question.lower() == 'y':
         main()
+        input("按任意键退出...")
