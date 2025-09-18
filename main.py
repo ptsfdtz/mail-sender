@@ -5,36 +5,57 @@ from tqdm import tqdm
 from utils.file_utils import read_recipient_list, read_credentials
 from utils.smtp_utils import get_smtp_settings
 
+
 class EmailSenderApp:
-    def __init__(self, config):
-        self.department = config["department"]
-        self.qq_group_id = config["qqGroupId"]
+    def __init__(self, status):
         self.username, self.password = read_credentials('./key.txt')
 
-        # 录取名单
-        admitted_file = './data/录取名单.xlsx'
-        admitted_recipients = read_recipient_list(admitted_file)
-        if admitted_recipients:
-            self.send_emails(admitted_recipients, status="录取")
+        if status == "面试":
+            recipient_file = './data/面试名单.xlsx'
+            recipients = read_recipient_list(recipient_file)
+            if recipients:
+                self.send_interview_emails(recipients)
 
-        # 未录取名单
-        rejected_file = './data/未录取名单.xlsx'
-        rejected_recipients = read_recipient_list(rejected_file)
-        if rejected_recipients:
-            self.send_emails(rejected_recipients, status="未录取")
+        elif status == "录取":
+            recipient_file = './data/录取名单.xlsx'
+            recipients = read_recipient_list(recipient_file)
+            if recipients:
+                self.send_admission_emails(recipients)
 
-    def send_emails(self, recipient_data, status):
+        else:
+            print("❌ 输入错误，只能是 '面试' 或 '录取'")
+
+    def send_interview_emails(self, recipient_data):
         total_recipients = len(recipient_data)
-        with tqdm(total=total_recipients, desc=f"sending {status} emails", unit="emails") as pbar:
-            for recipient_name, recipient_email in recipient_data.items():
-                self.send_email(recipient_name, recipient_email, status)
+        with tqdm(total=total_recipients, desc=f"sending 面试 emails", unit="emails") as pbar:
+            for recipient in recipient_data:
+                name = recipient["name"]
+                email = recipient["email"]
+                self.send_email(name, email, "面试")
                 pbar.update(1)
 
-    def send_email(self, recipient_name, recipient_email, status):
+    def send_admission_emails(self, recipient_data):
+        total_recipients = len(recipient_data)
+        with tqdm(total=total_recipients, desc=f"sending 录取/未录取 emails", unit="emails") as pbar:
+            for recipient in recipient_data:
+                name = recipient["name"]
+                email = recipient["email"]
+                department = recipient["department"]
+                qq_group_id = recipient["qqGroupId"]
+
+                if department and department != "无":
+                    status = "录取"
+                else:
+                    status = "未录取"
+
+                self.send_email(name, email, status, department, qq_group_id)
+                pbar.update(1)
+
+    def send_email(self, recipient_name, recipient_email, status, department=None, qq_group_id=None):
         smtp_host, smtp_port = get_smtp_settings(self.username)
         smtp = smtplib.SMTP_SSL(smtp_host, smtp_port)
 
-        subject = "南京工业大学大学生科学技术协会面试结果通知"
+        subject = f"南京工业大学大学生科学技术协会{status}通知"
         msg = EmailMessage()
         msg['Subject'] = subject
         msg['From'] = self.username
@@ -46,33 +67,29 @@ class EmailSenderApp:
                 html_content = f.read()
 
             # 公共替换
-            html_content = html_content.replace('{{name}}', recipient_name)
+            html_content = html_content.replace('{{name}}', str(recipient_name))
 
-            # 录取通知才替换群号和部门
+            # 录取才替换群号和部门
             if status == "录取":
-                html_content = html_content.replace('{{qqGroupId}}', self.qq_group_id)
-                html_content = html_content.replace('{{department}}', self.department)
+                html_content = html_content.replace('{{qqGroupId}}', str(qq_group_id))
+                html_content = html_content.replace('{{department}}', str(department))
 
             msg.add_alternative(html_content, subtype='html')
 
             smtp.login(self.username, self.password)
             smtp.send_message(msg)
-            print(f"successfully sent {status} email to {recipient_name} ({recipient_email})")
+            print(f"✅ successfully sent {status} email to {recipient_name} ({recipient_email})")
         except Exception as e:
-            print(f"failed to send {status} email to {recipient_name} ({recipient_email}): {e}")
+            print(f"❌ failed to send {status} email to {recipient_name} ({recipient_email}): {e}")
         finally:
             smtp.quit()
 
+
 def main():
-    with open('config.json', 'r', encoding='utf-8') as config_file:
-        config = json.load(config_file)
+    status = input("请输入要发送的邮件类型（面试 / 录取）: ").strip()
+    EmailSenderApp(status)
+    input("按Enter键退出...")
 
-    print(json.dumps(config, indent=4, ensure_ascii=False))
-
-    question = input("确认发送录取和未录取邮件吗？(y/n): ")
-    if question.lower() == 'y':
-        EmailSenderApp(config)
-        input("按任意键退出...")
 
 if __name__ == '__main__':
     main()
