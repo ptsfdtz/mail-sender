@@ -1,8 +1,7 @@
-/index.xlsx
-/key.txt
-/utils/__pycache__
-/main.exe
-/config.json
-/test
-/Interview
-/save.txt
+node_modules/
+dist/
+src-tauri/target/
+src-tauri/gen/
+.vscode/
+*.log
+key.txt
