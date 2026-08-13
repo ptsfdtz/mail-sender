@@ -187,8 +187,8 @@ export default function App() {
             <Mail size={20} />
           </span>
           <div>
-            <strong>信使</strong>
-            <small>MAIL SENDER</small>
+            <strong>发邮件</strong>
+            <small>EMAIL SENDER</small>
           </div>
         </div>
         <nav aria-label="主导航">

@@ -1,4 +1,4 @@
-# 信使 Mail Sender
+# 发邮件
 
 一个用于批量发送 HTML 通知邮件的 Windows 桌面应用。名单从 Excel 导入，邮件内容继续使用项目原有的三份富文本模板。
 
@@ -38,6 +38,15 @@ pnpm tauri build
 ```
 
 构建完成后，安装包位于 `src-tauri/target/release/bundle/nsis/`，主程序位于 `src-tauri/target/release/mail-sender.exe`。
+
+## 发布版本
+
+推送以 `v` 开头的版本标签会自动构建 Windows 安装包，并创建同名 GitHub Release 后上传安装包附件。
+
+```powershell
+git tag v2.1.1
+git push origin v2.1.1
+```
 
 ## 邮件模板
 

@@ -1,6 +1,6 @@
 [package]
 name = "mail-sender"
-version = "2.0.0"
+version = "2.1.0"
 description = "Desktop bulk HTML email sender"
 authors = ["ptsfdtz"]
 edition = "2021"

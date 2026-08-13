@@ -1,8 +1,9 @@
 name: Build Release
 
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - "v*"
 
 permissions:
   contents: write
@@ -36,5 +37,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          releaseId: ${{ github.event.release.id }}
+          tagName: ${{ github.ref_name }}
+          releaseName: 发邮件 ${{ github.ref_name }}
+          releaseDraft: false
+          prerelease: false
           args: --target x86_64-pc-windows-msvc
