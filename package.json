@@ -1,7 +1,8 @@
 {
   "name": "mail-sender",
   "private": true,
-  "version": "2.1.0",
+  "version": "2.1.2",
+  "packageManager": "pnpm@11.7.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
